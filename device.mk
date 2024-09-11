@@ -3,7 +3,21 @@
 # Copyright (C) 2023 TeamWin Recovery Project
 #
 
-LOCAL_PATH := device/tecno/LH6n
+LOCAL_PATH := device/tecno/LH6N
+
+# Inherit from those products. Most specific first.
+$(call inherit-product, $(SRC_TARGET_DIR)/product/core_64_bit_only.mk)
+$(call inherit-product, $(SRC_TARGET_DIR)/product/base.mk)
+
+# Installs gsi keys into ramdisk, to boot a developer GSI with verified boot.
+$(call inherit-product, $(SRC_TARGET_DIR)/product/gsi_keys.mk)
+
+# Enable project quotas and casefolding for emulated storage without sdcardfs
+$(call inherit-product, $(SRC_TARGET_DIR)/product/emulated_storage.mk)
+
+# Enable Virtual A/B OTA
+$(call inherit-product, $(SRC_TARGET_DIR)/product/virtual_ab_ota/launch_with_vendor_ramdisk.mk)
+$(call inherit-product, $(SRC_TARGET_DIR)/product/virtual_ab_ota/compression.mk)
 
 # Virtual A/B
 ENABLE_VIRTUAL_AB := true
@@ -19,7 +33,6 @@ AB_OTA_PARTITIONS += \
     system_ext \
     vbmeta_system \
     vbmeta_vendor
-
 TARGET_ENFORCE_AB_OTA_PARTITION_LIST := true
 
 # A/B Post-Install Configuration
@@ -35,55 +48,62 @@ AB_OTA_POSTINSTALL_CONFIG += \
     FILESYSTEM_TYPE_vendor=erofs \
     POSTINSTALL_OPTIONAL_vendor=true
 
-# Boot control HAL
-PRODUCT_PACKAGES += \
-    android.hardware.boot@1.2-impl \
-    android.hardware.boot@1.2-impl.recovery \
-    vendor.sprd.hardware.boot@1.2-impl \
-    vendor.sprd.hardware.boot@1.2-impl.recovery
-
-# Boot control HAL
-PRODUCT_PACKAGES += \
-    android.hardware.boot@1.0-service
-
-PRODUCT_PACKAGES += \
-    bootctrl \
-    bootctrl.recovery 
-
-PRODUCT_PACKAGES += \
-    bootctrl.mt6768
-
-PRODUCT_PACKAGES_DEBUG += \
-    bootctrl.mt6768 \
-    update_engine_client
-
 PRODUCT_PACKAGES += \
     otapreopt_script \
-    cppreopts.sh \
-    update_engine \
-    update_verifier \
-    update_engine_sideload
+    cppreopts.sh
 
-# Health HAL
+PRODUCT_PROPERTY_OVERRIDES += ro.twrp.vendor_boot=true
+
+# Dynamic Partitions
+PRODUCT_USE_DYNAMIC_PARTITIONS := true
+
+# API
+PRODUCT_SHIPPING_API_LEVEL := 31
+PRODUCT_TARGET_VNDK_VERSION := 31
+
+# Boot control HAL
 PRODUCT_PACKAGES += \
-    android.hardware.health@2.1-service \
-    android.hardware.health@2.1-impl \
-    libhealthd.$(PRODUCT_PLATFORM)
-TW_LOAD_VENDOR_MODULES := $(shell echo \"$(shell ls $(LOCAL_PATH)/recovery/root/lib/modules)\")
+    android.hardware.boot@1.2-mtkimpl \
+    android.hardware.boot@1.2-mtkimpl.recovery
 
+PRODUCT_PACKAGES_DEBUG += \
+    bootctl
+
+# Fastbootd
 PRODUCT_PACKAGES += \
     android.hardware.fastboot@1.0-impl-mock \
     fastbootd
 
-# MTK PlPath Utils
+# Health Hal
+PRODUCT_PACKAGES += \
+    android.hardware.health@2.1-impl \
+    android.hardware.health@2.1-service
+
+# Keymaster
+PRODUCT_PACKAGES += \
+    android.hardware.keymaster@4.1
+
+# Keystore Hal
+PRODUCT_PACKAGES += \
+    android.system.keystore2
+
+# MTK plpath utils
 PRODUCT_PACKAGES += \
     mtk_plpath_utils \
     mtk_plpath_utils.recovery
 
-# Dynamic Partitions
-PRODUCT_USE_DYNAMIC_PARTITIONS := true
-PRODUCT_ENFORCE_VINTF_MANIFEST := true
+# Update engine
+PRODUCT_PACKAGES += \
+    update_engine \
+    update_engine_sideload \
+    update_verifier
 
-# API level and VNDK Version
-PRODUCT_TARGET_VNDK_VERSION := 33
-PRODUCT_SHIPPING_API_LEVEL := 32
+PRODUCT_PACKAGES_DEBUG += \
+    update_engine_client
+
+# Additional configs
+TW_RECOVERY_ADDITIONAL_RELINK_LIBRARY_FILES += \
+    $(TARGET_OUT_SHARED_LIBRARIES)/android.hardware.keymaster@4.1
+
+TARGET_RECOVERY_DEVICE_MODULES += \
+    android.hardware.keymaster@4.1
