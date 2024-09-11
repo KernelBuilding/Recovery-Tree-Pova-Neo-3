@@ -3,7 +3,7 @@
 # Copyright (C) 2023 TeamWin Recovery Project
 #
 
-DEVICE_PATH := device/tecno/LH6n
+DEVICE_PATH := device/tecno/LH6N
 
 # For building with minimal manifest
 ALLOW_MISSING_DEPENDENCIES := true
