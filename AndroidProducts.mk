@@ -5,10 +5,10 @@
 
 # Define the path for the makefile
 PRODUCT_MAKEFILES := \
-    $(LOCAL_DIR)/twrp_LH6n.mk
+    $(LOCAL_DIR)/twrp_LH6N.mk
 
 # Define common lunch choices for building
 COMMON_LUNCH_CHOICES := \
-    twrp_LH6n-eng \
-    twrp_LH6n-user \
-    twrp_LH6n-userdebug
+    twrp_LH6N-eng \
+    twrp_LH6N-user \
+    twrp_LH6N-userdebug
